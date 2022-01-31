@@ -1,0 +1,16 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Active Listings</h2>
+    {% for auction in auctions %}
+        <ul>{
+            <li>{ auction.auctionTitle }</li>
+            <li>{ auction.auctionDescription }</li>
+            <li>{ auction.auctionStartBid }</li>
+            <li>{ auction.auctionImageURL }</li>
+            <li>{ auction.auctionCategory }</li>
+        </ul>
+    {% empty %}
+        <div>There are currently no live auctions on this site</div>
+    {% endfor %}
+{% endblock %}
