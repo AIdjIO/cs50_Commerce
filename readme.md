@@ -1,3 +1,4 @@
+CS50W - Django Commerce site Project
 # Specification
 ## Complete the implementation of your auction site. You must fulfill the following requirements:
 
