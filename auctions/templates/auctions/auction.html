@@ -1,0 +1,32 @@
+{% extends "auctions/layout.html" %}
+ 
+{% block body %}
+
+    {% if message %}
+    <div>{{ message }}</div>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+    {% csrf_token %}
+    <input type="hidden" name="auction_id" value={{ auction.id }}>
+    <button class="btn btn-primary" id="watch" onClick="addToWatchList()"><i class="far fa-heart"></i></button>
+    {% else %}
+    <p>User is not logged in :(</p>
+    {% endif %}
+
+    <h1>Auction: {{ auction.title }}</h1>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div id="image">
+                    <img src="{{ auction.imageURL }}" alt="image of item" width="100%" max-width="500" height="auto">
+                </div>
+            </div>
+            <div class="desc col-md-6">
+                <div id="description">{{ auction.description }}</div>
+                <div id="bids">${{ auction.startBid }}</div>
+                <div id="category">{{ auction.category }}</div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

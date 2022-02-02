@@ -2,15 +2,18 @@
 
 {% block body %}
     <h2>Active Listings</h2>
+    {% if category %}<h3>Categories : {{ category }} </h3>{% endif %}
+    <ul>
     {% for auction in auctions %}
-        <ul>{
-            <li>{ auction.auctionTitle }</li>
-            <li>{ auction.auctionDescription }</li>
-            <li>{ auction.auctionStartBid }</li>
-            <li>{ auction.auctionImageURL }</li>
-            <li>{ auction.auctionCategory }</li>
-        </ul>
+        <li>
+        <a href="/auction/{{ auction.id }}">Title: {{ auction.title }}</a>
+        <div>Desctiption: {{ auction.description }}</div>
+        <p>Current bid: {{ auction.startBid }}</p>
+        <img src="{{ auction.imageURL }}" alt="image of the auctioned item" width="auto" height="300px">
+        <p>Category: {{ auction.category }}</p>
+        </li>
     {% empty %}
         <div>There are currently no live auctions on this site</div>
     {% endfor %}
+    </ul>
 {% endblock %}

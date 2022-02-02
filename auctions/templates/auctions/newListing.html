@@ -1,5 +1,41 @@
 {% extends "auctions/layout.html" %}
 
-<form action="{% url 'newListing' %}" method="post">
+{% block body %}
+<div class="col-md-3">
+<form action="{% url 'new' %}" method="post">
     {% csrf_token %}
+    <div class="form-group">
+        {{ form }}
+    </div>
+    <!-- <div>
+        <label for="title">Title:</label>
+    <input type="text" class="form-control" name="title" placeholder="Provide a descriptive title">
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea type="text" class="form-control" name="description" rows="10" placeholder="Describe your item"></textarea>
+    </div>
+    <div class="form-group">
+    <label for="startBid">Starting Bid:</label>
+    <input type="number"  class="form-control" name="startBid" step="0.01" min="0.01" placeholder="Starting bid, minimum $0.01">
+    </div>
+    <div class="form-group">
+    <label for="imageURL">Image URL:</label>
+    <input type="url"  class="form-control" name="imageURL" placeholder="http://">
+    </div>
+    <div class="form-group">
+    <label for="category">Category:</label>
+    <input list="category" class="form-control" name="category" placeholder="Toys, Games, Tools....">
+    <datalist id="category">
+        <option value="Books">
+        <option value="Cars">
+        <option value="Furniture">
+        <option value="Electronics">
+        <option value="Music">
+        <option value="Other"></option>
+    </datalist>
+    </div> -->
+    <button type="submit" class="btn btn-primary">Go live!</button>
 </form>
+</div>
+{% endblock %}

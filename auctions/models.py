@@ -1,29 +1,41 @@
+from asyncio.windows_events import NULL
 from xml.dom.pulldom import parseString
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
 class User(AbstractUser):
     pass
 
-class AuctionListing(models.Model):
-    auctionTitle = models.CharField(max_length = 64)
-    auctionDescription = models.TextField()
-    auctionStartBid = models.DecimalField(max_digits=19, decimal_places=2)
-    auctionImageURL = models.URLField()
-    auctionCategory = models.CharField(max_length = 40)
+class Auction(models.Model):
+    creationDate = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length = 64, default='')
+    description = models.TextField(default='')
+    startBid = models.DecimalField(max_digits=19, decimal_places=2)
+    imageURL = models.URLField(default='')
+    category = models.CharField(max_length = 40, default='')
+    seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller")
 
     def __str__(self):
-        return f"{self.auctionTitle} {self.auctionDescription} ${self.auctionStartBid} {self.auctionCategory}"
+        return f"{self.title} ${self.startBid} {self.category} started at {self.creationDate} sold by {self.seller}"
 
-class Bids(models.Model):
-    bidsOnListing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, related_name="listingBids")
-    bid = models.DecimalField(max_digits=19, decimal_places=2, default=0.99)
+class WatchList(models.Model):
+    watching = models.ForeignKey(Auction, on_delete=models.PROTECT, related_name="auction", default=NULL)
+    watcher = models.ForeignKey(User, on_delete=models.PROTECT, related_name="watcher")
+
+class Bid(models.Model):
+    bidDate = models.DateTimeField(auto_now_add=True)
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="bids", default=0)
+    bid = models.DecimalField(max_digits=12, decimal_places=2, default=0.01)
+    bidder = models.ManyToManyField(User, related_name="bidder")
     
     def __str__(self):
-        return f"{self.auctionListing} {self.bid}"
+        return f"{self.auction} {self.bid} @{self.bidDate} by {self.bidder}"
 
 class Comment(models.Model):
-    commentOnListing = models.ForeignKey(AuctionListing, on_delete=models.CASCADE, related_name="listingComments")
-    comments= models.TextField()
-    pass
+    creationDate = models.DateTimeField(auto_now_add=True)
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="comment", default=0)
+    comment= models.TextField(default='')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
+
+    def __str__(self):
+        return f"{self.comment} on {self.creationDate}, extract:{(self.comment)[0-50]}"
