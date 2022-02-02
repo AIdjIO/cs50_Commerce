@@ -19,8 +19,11 @@ class Auction(models.Model):
         return f"{self.title} ${self.startBid} {self.category} started at {self.creationDate} sold by {self.seller}"
 
 class WatchList(models.Model):
-    watching = models.ForeignKey(Auction, on_delete=models.PROTECT, related_name="auction", default=NULL)
+    watching = models.ForeignKey(Auction, on_delete=models.PROTECT, related_name='auction', default=NULL)
     watcher = models.ForeignKey(User, on_delete=models.PROTECT, related_name="watcher")
+
+    def __str__(self):
+        return f"{self.watching} {self.watcher}"
 
 class Bid(models.Model):
     bidDate = models.DateTimeField(auto_now_add=True)

@@ -30,7 +30,7 @@
                     <a class="nav-link btn btn-secondary m-1" href="{% url 'categories' %}">Categories</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link btn btn-secondary m-1" href="{% url 'categories' %}">WatchList <span id="watchCount">0</span></a>
+                    <a class="nav-link btn btn-secondary m-1" href="{% url 'watchList' %}">WatchList <sup><span id="watchCount">{{ watchCount }}</span></sup></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link btn btn-danger m-1" href="{% url 'logout' %}">Log Out</a>
