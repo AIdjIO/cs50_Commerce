@@ -9,10 +9,15 @@ from django.contrib.auth.decorators import login_required
 from .form import *
 from .models import *
 
+import urllib.parse
+
 def index(request):
-    print(Auction.objects.all())
+   # currentAuction = Bid.objects.values('auction').annotate(maxBid = Max('bid'))
+    maxAuction = Auction.objects.annotate(max_bid=Max('bids__bid')).order_by('-creationDate')
+
+
     return render(request, "auctions/index.html",
-    {"auctions": Auction.objects.all(),'watchCount': watchCount(request)})
+    {"auctions": maxAuction,'watchCount': watchCount(request)})
 
 def login_view(request):
     if request.method == "POST":
@@ -78,15 +83,21 @@ def newListing(request):
 
             newListing = Auction(
                 title = title, 
-                description = description, 
-                startBid = startBid, 
+                description = description,
                 imageURL = imageURL, 
                 category = category,
                 seller = request.user
             )
 
+            openingBid = Bid(
+                auction= newListing,
+                bid = startBid,
+                bidder = request.user
+            )
+
             try:
                 newListing.save()
+                openingBid.save()
             except IntegrityError:
                 return render(request, "auctions/newListings.html", {
                     "message": "There was an issue posting your ad. Please try again"
@@ -97,19 +108,28 @@ def newListing(request):
 
 @login_required(login_url='/login')
 def auction(request, auction_id):
-    auction = Auction.objects.get( pk = auction_id )
+    # get current auction with highest current bid
+    currentAuction = Auction.objects.filter(pk = auction_id).annotate(max_bid=Max('bids__bid')).get(pk=auction_id)
+    #currentBid = Bid.objects.filter(auction = currentAuction)
+    #maxBid = currentBid.aggregate(Max('bid'))
+
+    # get auction comment
+    comments = Comment.objects.filter(auction = auction_id).order_by('-creationDate')
+
     if (isInWatchList(request, auction_id).count() == 0):
         spanClass = 'far'
     else:
         spanClass = "fas"
 
-    return render(request, "auctions/auction.html", {"auction": auction, 'watchCount': watchCount(request), 'spanClass' : spanClass})
+    return render(request, "auctions/auction.html", {"auction": currentAuction, 'watchCount': watchCount(request), 'spanClass' : spanClass, 'comments': comments})
 
 @login_required(login_url='/login')
 def categories(request, category = None):
     if category is not None:
         auctions = Auction.objects.filter(category = category)
-        return render(request, f"auctions/index.html", {"auctions": auctions, "category": category})    
+        return render(request, f"auctions/index.html", {"auctions": auctions, "category": category})
+
+    # get all the categories (without duplicate)    
     categories = Auction.objects.values('category').distinct().order_by("category")
     return render(request, f"auctions/category.html", {"categories": categories})
 
@@ -140,6 +160,7 @@ def watchCount(request):
 @login_required(login_url='/login')
 def updateWatchList(request):
     ''' Update watch list '''
+
     auction_id = int(request.body.decode('utf-8'))
     currentUser = User.objects.get(username = request.user)
     currentAuction = Auction.objects.get(id=auction_id)
@@ -160,9 +181,55 @@ def watchList(request):
     currentUser = User.objects.filter(username = request.user).first()
     # get the user watch list
     userWatchList = WatchList.objects.filter(watcher_id = currentUser.id)
-
+    print(userWatchList)
     auctions = [c.watching for c in userWatchList]
 
     return render(request, "auctions/index.html", 
     {"auctions": auctions, 'watchCount': watchCount(request)
     })
+
+@login_required(login_url='/login')
+def comment(request):
+    ''' return watchlist '''
+    # get the current user from database
+    currentUser = User.objects.filter(username = request.user).first()
+    print(request.POST)
+    # parse query
+    queryStr = request.body.decode('utf-8')
+    parsedQueryStr =  urllib.parse.parse_qs(queryStr)
+    print(parsedQueryStr)
+    comment = parsedQueryStr['comment'][0]
+    auction_id = int(parsedQueryStr['auction_id'][0])
+    
+    currentAuction = Auction.objects.get(id=auction_id)
+
+    Comment(auction = currentAuction, comment = comment, user = currentUser).save()
+
+    return JsonResponse({'comment': 'valid'})
+
+@login_required(login_url='/login')
+def bid(request):
+
+    if request.method == 'POST':
+        query = request.POST
+        auction_id = query.get('auction_id')
+        currentBid = float(query.get('bid'))
+        currentMaxBid = Auction.objects.filter(pk = auction_id).annotate(max_bid=Max('bids__bid')).get(pk=auction_id).max_bid
+
+        print (currentBid, currentMaxBid)
+        currentUser = User.objects.get(username = request.user)
+        currentAuction = Auction.objects.get(id = auction_id)
+        #currentMaxBid = Bid.objects.filter(auction_id = currentAuction)
+        
+        if currentBid <= currentMaxBid:
+            return JsonResponse({'message':'your bid is too low'})
+
+
+        newBid = Bid(
+            auction = currentAuction,
+            bid = currentBid,
+            bidder = currentUser)
+
+        newBid.save()
+
+    return JsonResponse({'message':'You are the highest bidder'})

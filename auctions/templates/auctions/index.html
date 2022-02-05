@@ -2,18 +2,35 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-    {% if category %}<h3>Categories : {{ category }} </h3>{% endif %}
-    <ul>
+    {% if category %}<h3>Categories : {{ category }}</h3>{% endif %}
+    <table id="auctionTable" class="display" style="width:100%">
+        <thead>
+            <tr>
+            <th>Title</td><th>Photo</th><th>Description</th><th>Category</th><th>Bid</th>
+            </tr>
+        </thead>
+        <tbody>
     {% for auction in auctions %}
-        <li>
-        <a href="{% url 'auction' auction.id %}" >Title: {{ auction.title }}</a>
-        <div>Desctiption: {{ auction.description }}</div>
-        <p>Current bid: {{ auction.startBid }}</p>
-        <img src="{{ auction.imageURL }}" alt="image of the auctioned item" width="auto" height="300px">
-        <p>Category: {{ auction.category }}</p>
-        </li>
+        <tr>
+            <td><h2><a href="{% url 'auction' auction.id %}" >{{ auction.title }}</a></h2></td>
+            <td><img src="{{ auction.imageURL }}" alt="image of the auctioned item" width="auto" height="300px"></td>
+            <td>{{ auction.description }}</td>
+            <td>{{ auction.category }}</td>
+            <td> ${{ auction.max_bid }}</td>
+        </tr>
     {% empty %}
-        <div>There are currently no live auctions on this site</div>
+        <tr>There are currently no live auctions on this site or your watch list is empty</tr>
     {% endfor %}
-    </ul>
+        </tbody>
+        <tfoot>
+            <tr>
+            <th>Title</td><th>Photo</th><th>Description</th><th>Category</th><th>Price</th>
+            </tr>
+        </tfoot>
+    </table>
+    <script>
+        $(document).ready( function () {
+            $('#auctionTable').DataTable();
+        } );
+    </script>
 {% endblock %}

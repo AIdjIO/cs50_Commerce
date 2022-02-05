@@ -1,11 +1,5 @@
 @charset "UTF-8";
 
-*, html, body, img {
-    /* background-color:#0d1117; */
-    background-color: white;
-    color:#192531;
-}
-
 /* html {
     background-image: url('https://upload.wikimedia.org/wikipedia/en/thumb/2/29/Harvard_shield_wreath.svg/1200px-Harvard_shield_wreath.svg.png');
     background-repeat:no-repeat;
@@ -16,19 +10,23 @@ body {
     padding: 10px;
 }
 
-tr{
-    display:block;
-    float:left;
-}
-/* auction description */
-.desc {
-    border:1px solid black;
+img, .desc {
+    box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+    border-radius:5px;
 }
 
 i {
     background-color:transparent;
 }
 
-img {
-        box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
+ul, ol {
+    list-style-type: none;
+}
+
+h2 {
+    text-align:center;
+}
+
+#seller {
+    align-items: flex-end;
 }

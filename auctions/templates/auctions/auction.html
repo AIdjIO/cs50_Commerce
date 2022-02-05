@@ -3,7 +3,7 @@
 {% block body %}
 
     {% if message %}
-    <div>{{ message }}</div>
+    <div class="message">{{ message }}</div>
     {% endif %}
 
     {% if request.user.is_authenticated %}
@@ -17,16 +17,51 @@
     <h1>Auction: {{ auction.title }}</h1>
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-3">
+                <div class="form-group" method="POST">
+                    <label>Current Bid: </label>
+                    {% if user.is_authenticated %}
+                    {% csrf_token %}
+                    <input class="formControl" type="number" name="bid" value="{{ auction.max_bid }}">
+                    <input class="formControl mb-3" type="hidden" name="auction_id" value="{{ auction.id }}">
+                    <button class="formControl btn btn-primary w-10" onclick="bid(event)" name="submit">Place Bid</button>
+                    {% else %}
+                        {{ auction.max_bid }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-4">
                 <div id="image">
                     <img src="{{ auction.imageURL }}" alt="image of item" width="100%" max-width="500" height="auto">
                 </div>
             </div>
-            <div class="desc col-md-6">
-                <div id="description">{{ auction.description }}</div>
-                <div id="bids">${{ auction.startBid }}</div>
-                <div id="category">{{ auction.category }}</div>
+            <div class="col-md-4">
+                <div>{{ auction.description }}</div>
             </div>
+            <div class="col-md-auto">
+                <div id="category">Category: {{ auction.category }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="seller" class="row m-3 float-right">Listed by: {{ auction.seller }}</div>
+    <hr>
+    <div class="container-fluid">
+        <div class="row">
+            <div id="comments-container">Comments</div>
+        </div>
+        <div class="row">
+            <textarea placeholder="Add a comment"></textarea>
+        </div>
+        <div class="row">
+            <button class="btn btn-primary" onclick="comment(event)">Post</button>
+        </div>
+        <div id="#commentGroup">
+            {% for comment in comments %}
+            <div class="comment">{{ comment.comment }}</div>
+            {% empty %}
+            <div class="comment">There are no comments</div>
+            {% endfor %}
         </div>
     </div>
     {% endblock %}

@@ -4,7 +4,8 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    pass
+     def __str__(self):
+        return f"{self.username}"
 
 class Auction(models.Model):
     creationDate = models.DateTimeField(auto_now_add=True)
@@ -27,9 +28,9 @@ class WatchList(models.Model):
 
 class Bid(models.Model):
     bidDate = models.DateTimeField(auto_now_add=True)
-    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="bids", default=0)
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, default=0,related_name='bids')
     bid = models.DecimalField(max_digits=12, decimal_places=2, default=0.01)
-    bidder = models.ManyToManyField(User, related_name="bidder")
+    bidder = models.ForeignKey(User,on_delete=models.PROTECT, related_name="currentBidder")
     
     def __str__(self):
         return f"{self.auction} {self.bid} @{self.bidDate} by {self.bidder}"
@@ -41,4 +42,4 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
 
     def __str__(self):
-        return f"{self.comment} on {self.creationDate}, extract:{(self.comment)[0-50]}"
+        return f"{self.comment} on {self.creationDate}, extract:{(self.comment)}"
