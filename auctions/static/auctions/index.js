@@ -1,3 +1,8 @@
+$('#postComment').on('shown.bs.modal', function () {
+    $('#myInput').trigger('focus')
+  })
+
+
 function addToWatchList(id = null){
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let xhttp = new XMLHttpRequest();
@@ -39,13 +44,14 @@ function bid(event){
             respObj = JSON.parse(this.responseText)
             
             // sending a message to the user upon bidding.
-            message = document.getElementById('message') || document.createElement('div')
-            if (message.id != 'message') {
-                message.id = 'message';
-                message.innerText = respObj.message
+            message = document.getElementById('bidMessage') || document.createElement('div')
+            if (message.id != 'bidMessage') {
+                message.id = 'bidMessage';
+                message.innerText = respObj.bidMessage
                 document.querySelector('button[name="submit"]').parentNode.append(message)
             }
-            message.innerText = respObj.message
+            message.innerText = respObj.bidMessage
+            document.querySelector('input[name="bid"]').value = parseFloat(respObj.winningBid)
             }
         }
     
@@ -55,20 +61,22 @@ function bid(event){
     
     // get the hidden input field to retrieve the auction_id
     let auction_id = document.querySelector('input[name="auction_id"]').value;
-    let bid = document.querySelector('input[name="bid"]').value
+    let bid = parseFloat(document.querySelector('input[name="bid"]').value)
     
     xhttp.send(`auction_id=${auction_id}&bid=${bid}`);
 }
 
 function comment(event){
-    let comment = document.querySelector('textarea').value;
+    let comment = document.getElementById('comment').value;
     if (comment === '') return;
     
     // get the hidden input field to retrieve the auction_id
     let auction_id = parseInt(document.querySelector('input[name="auction_id"]').value);
-    let commentDiv = event.target.parentNode.nextElementSibling.firstElementChild;
+    // let commentDiv = event.target.parentNode.nextElementSibling.firstElementChild;
+    let commentGroup = document.getElementById('commentGroup');
+    let firstComment = commentGroup.firstElementChild.firstElementChild.nextElementSibling.firstElementChild;
 
-    console.log(commentDiv)
+    console.log(firstComment)
     
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let xhttp = new XMLHttpRequest();
@@ -77,13 +85,17 @@ function comment(event){
             if(this.readyState == 4 && this.status == 200){
                 respObj = JSON.parse(this.responseText)
                 if (respObj.comment === 'valid'){              
-                    if (commentDiv.innerText === "There are no comments"){
-                        commentDiv.innerText = comment
+                    if (firstComment.innerText === "There are no comments"){
+                        firstComment.innerText = comment
                     } else {
                     let div = document.createElement('div');
-                    div.className="comment"
-                    div.innerText = comment
-                    commentDiv.parentNode.insertBefore(div, commentDiv)
+                    div.className="card my-2 w-100"
+                    div.innerHTML = `<div class="card-header">Be the first to comment</div>
+                                        <div class="comment card-body my-2">
+                                        <p class="card-text">${comment}</p>
+                                        <h6 class="comment card-subtitle">${new Date().toDateString() }</h6>
+                                    </div>`
+                    commentGroup.insertBefore(div, commentGroup.firstElementChild)
                     }
                 }
             }

@@ -106,22 +106,38 @@ def newListing(request):
     else:
         return render(request, "auctions/newListing.html", {'form': NewAuctionForm()})
 
-@login_required(login_url='/login')
+#@login_required(login_url='/login')
 def auction(request, auction_id):
     # get current auction with highest current bid
     currentAuction = Auction.objects.filter(pk = auction_id).annotate(max_bid=Max('bids__bid')).get(pk=auction_id)
-    #currentBid = Bid.objects.filter(auction = currentAuction)
-    #maxBid = currentBid.aggregate(Max('bid'))
+    currentBids = Bid.objects.filter(auction = currentAuction) # get the bids on the current auction
+    maxBid = float(currentBids.aggregate(Max('bid'))['bid__max']) # get the maximum bid amount
+    currentBid = Bid.objects.get(bid = maxBid) # get the current bid
+    print(currentBid.bidder)
+    spanClass = 'far'
 
     # get auction comment
     comments = Comment.objects.filter(auction = auction_id).order_by('-creationDate')
+    print(request.user)
+    if request.user == 'AnonymousUser':
+        if (isInWatchList(request, auction_id).count() == 0):
+            spanClass = 'far'
+        else:
+            spanClass = "fas"
 
-    if (isInWatchList(request, auction_id).count() == 0):
-        spanClass = 'far'
+    if (request.user == currentBid.bidder):
+        bidMessage = "You are the highest bidder"
     else:
-        spanClass = "fas"
+        bidMessage = f"{currentBid.bidder} is the highest bidder"
 
-    return render(request, "auctions/auction.html", {"auction": currentAuction, 'watchCount': watchCount(request), 'spanClass' : spanClass, 'comments': comments})
+    return render(request, "auctions/auction.html", {
+        "auction": currentAuction,
+        'watchCount': watchCount(request),
+        'spanClass' : spanClass,
+        'comments'  : comments,
+        'bidForm'   : NewBidForm({'bid':maxBid }),
+        'bidMessage'   : bidMessage
+        })
 
 @login_required(login_url='/login')
 def categories(request, category = None):
@@ -214,22 +230,24 @@ def bid(request):
         query = request.POST
         auction_id = query.get('auction_id')
         currentBid = float(query.get('bid'))
-        currentMaxBid = Auction.objects.filter(pk = auction_id).annotate(max_bid=Max('bids__bid')).get(pk=auction_id).max_bid
+        currentMaxBid = float(Auction.objects.filter(pk = auction_id).annotate(max_bid=Max('bids__bid')).get(pk=auction_id).max_bid)
 
         print (currentBid, currentMaxBid)
         currentUser = User.objects.get(username = request.user)
         currentAuction = Auction.objects.get(id = auction_id)
-        #currentMaxBid = Bid.objects.filter(auction_id = currentAuction)
+        currentWinningBid = Bid.objects.filter(auction_id = currentAuction)
         
-        if currentBid <= currentMaxBid:
-            return JsonResponse({'message':'your bid is too low'})
+        currentWinningBidder = Bid.objects.get(bid = currentMaxBid).bidder
 
+        if currentWinningBidder != request.user: #no need for the winning bidder to bid higher than the winning bid
+            if currentBid <= currentMaxBid:
+                return JsonResponse({'bidMessage':'your bid is too low','winningBid':currentMaxBid})
+            if currentBid > currentMaxBid:
+                    newBid = Bid(
+                        auction = currentAuction,
+                        bid = currentBid,
+                        bidder = currentUser)
+                    newBid.save()
+                    return JsonResponse({'bidMessage':'You are the highest bidder', 'winningBid':currentBid})
 
-        newBid = Bid(
-            auction = currentAuction,
-            bid = currentBid,
-            bidder = currentUser)
-
-        newBid.save()
-
-    return JsonResponse({'message':'You are the highest bidder'})
+    return JsonResponse({'bidMessage':'You are already the highest bidder', 'winningBid':currentMaxBid})
