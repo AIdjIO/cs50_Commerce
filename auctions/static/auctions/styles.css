@@ -34,3 +34,23 @@ h2 {
 #seller {
     align-items: flex-end;
 }
+
+#category {
+    position:relative;
+}
+
+#commentGroup{
+    overflow:auto;
+    height:400px;
+}
+
+#description{
+    max-height:500px;
+    height:350px;
+}
+
+#bid {
+    position:sticky;
+    bottom:0px;
+
+}

@@ -251,3 +251,7 @@ def bid(request):
                     return JsonResponse({'bidMessage':'You are the highest bidder', 'winningBid':currentBid})
 
     return JsonResponse({'bidMessage':'You are already the highest bidder', 'winningBid':currentMaxBid})
+
+# @login_required(login_url='/login')
+# def endAuction(request):
+#     pass
