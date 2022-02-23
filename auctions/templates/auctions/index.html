@@ -14,9 +14,9 @@
         <tr>
             <td><h2><a href="{% url 'auction' auction.id %}" >{{ auction.title }}</a></h2></td>
             <td><img src="{{ auction.imageURL }}" alt="image of the auctioned item" width="auto" height="300px"></td>
-            <td>{{ auction.description }}</td>
+            <td  class="excerpt-text">{{ auction.description }}</td>
             <td>{{ auction.category }}</td>
-            <td> ${{ auction.max_bid }}</td>
+            <td> ${{ auction.max_bid | floatformat:2 }}</td>
         </tr>
     {% empty %}
         <tr>There are currently no live auctions on this site or your watch list is empty</tr>

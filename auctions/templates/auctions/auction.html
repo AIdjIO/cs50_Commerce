@@ -7,17 +7,16 @@
     {% endif %}
 
     {% if request.user == auction.seller %}
-	<form action="{% url 'endAuction' auction_id %}" method="post">
-	<!-- <form action="{% url 'endAuction' auction_id %}" method="post"> -->
+	<form action="" method="post">
 	{% csrf_token %}
-		<button class="btn btn-warning" type="submit">End Auction</button>
+		<button class="btn btn-warning float-right sticky" type="submit">End Auction</button>
         </form>
     {% endif %}
 
     {% if user.is_authenticated %}
     {% csrf_token %}
     <input type="hidden" name="auction_id" value={{ auction.id }}>
-    <button class="btn btn-primary" id="watch" onClick="addToWatchList('{{auction.id}}')"><i class="{{ spanClass }} fa-heart"></i></button>
+    <button type="button" class="btn btn-primary" id="watch" onclick="addToWatchList('{{auction.id}}')"><i class="{{ spanClass }} fa-heart"></i></button>
     <div id="category" class="alert alert-light">Category: {{ auction.category }}</div>
     {% else %}
     <div class="alert alert-info">Log in to bid or add to watch list</div>
@@ -26,64 +25,56 @@
     <h3>Auction: {{ auction.title }}</h3>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-md-auto m-3">           
-                    <img src="{{ auction.imageURL }}" alt="image of item" width="100%" max-width="500" height="auto">
+            <div class="col-md-4">           
+                <img class="img-fluid" src="{{ auction.imageURL }}" alt="image of item"  height="auto">
             </div>
-            <div class="col-md-8 m-3">
-                <div class="row">
-                    <div class="col-md-6 m-3">
-                        <div id="description">{{ auction.description }}</div>
-						<div id="bid" class="form-group" method="POST">
-							<label>Current Bid: </label>
-							{% if user.is_authenticated %}
-							{% csrf_token %}
-							{{ bidForm.bid }}
-							<input class="form-control p-3" type="hidden" name="auction_id" value="{{ auction.id }}">
-							<button class="form-control btn btn-success" onclick="bid(event)" name="submit">Place Bid</button>
-							{% else %}
-								{{ auction.max_bid }}
-							{% endif %}
-							{% if bidMessage %}
-							<div id="bidMessage" class="alert alert-info">{{ bidMessage }}</div>
-							{% endif %}
-						</div>
-                    </div>
-                    <div class="col-md-4 m-3">
-						<div class="row">
-							<!-- Button trigger modal -->
-							<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#postComment">
-								Post a comment
-							</button>
-						   </div>
-						<div id="commentGroup" class="row">
-							{% for comment in comments %}
-							<div class="card my-2 w-100">
-								<div class="card-header">{{ comment.user }} says:</div>
-								<div class="comment card-body my-2">
-									<p class="card-text">{{ comment.comment }}</p>
-									<h6 class="comment card-subtitle">{{ comment.creationDate }}</h6>
-								</div>
-							</div>
-								{% empty %}
-								<div class="card my-2 w-100">
-									<div class="card-header">Be the first to comment</div>
-									<div class="comment card-body my-2">
-										<p class="card-text">there are no comments at this time</p>
-										<h6 class="comment card-subtitle">{% now "jS F Y H:i" %}</h6>
-									</div>
-								</div>
-							{% endfor %}
-						</div>
-                    </div>
+            <div class="col-md-4">
+                <div id="description">{{ auction.description }}</div>
+                <div>
+                    <form id="bid" class="form-group p-1 m-1" method="POST">
+                        <label>Current Bid: </label>
+                        {% if user.is_authenticated %}
+                        {% csrf_token %}
+                        {{ bidForm.bid }}
+                        <input class="form-control" type="hidden" name="auction_id" value="{{ auction.id }}">
+                        <button type="button" class="form-control m-1 btn btn-success" onclick="placeBid()" name="submit">Place Bid</button>
+                        {% else %}
+                            {{ auction.max_bid | floatformat:2}}
+                        {% endif %}
+                        {% if bidMessage %}
+                        <div id="bidMessage" class="alert alert-info">{{ bidMessage }}</div>
+                        {% endif %}
+                    </form>
                 </div>
    			 </div>
+            <div class="col-md-4">                  
+                <div id="commentGroup">
+                    {% for comment in comments %}
+                    <div class="card my-2 w-100">
+                        <div class="card-header">{{ comment.user }} says:</div>
+                        <div class="comment card-body my-2">
+                            <p class="card-text">{{ comment.comment }}</p>
+                            <h6 class="comment card-subtitle">{{ comment.creationDate }}</h6>
+                        </div>
                     </div>
+                    {% empty %}
+                    <div class="card my-2 w-100">
+                        <div class="card-header">Be the first to comment</div>
+                        <div class="comment card-body my-2">
+                            <p class="card-text">there are no comments at this time</p>
+                            <h6 class="comment card-subtitle">{% now "jS F Y H:i" %}</h6>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#postComment">
+                    Post a comment
+                </button>
             </div>
         </div>
     </div>
-
-    <div id="seller" class="row m-3 float-right">Listed by: {{ auction.seller }}</div>
+    <div id="seller" class="row m-3 float-left">Listed by: {{ auction.seller }}</div>
     
     <!-- Modal -->
     <div class="modal fade" id="postComment" tabindex="-1" role="dialog" aria-labelledby="postComment" aria-hidden="true">

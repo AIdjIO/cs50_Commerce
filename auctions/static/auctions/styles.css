@@ -13,9 +13,6 @@ body {
 img, .desc {
     box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
     border-radius:5px;
-    max-height:65vh;
-    width:auto;
-    max-width:33vw;
     align-items:center
 }
 
@@ -37,6 +34,7 @@ h2 {
 
 #category {
     position:relative;
+    display:inline-block;
 }
 
 #commentGroup{
@@ -45,12 +43,19 @@ h2 {
 }
 
 #description{
-    max-height:500px;
-    height:350px;
+
 }
 
 #bid {
-    position:sticky;
+    box-shadow: 0 0 6px 8px #929691;
+    border-radius:5px;
+    background-color:white;
+    z-index:1;
+    position:fixed;
     bottom:0px;
+    right:0px;
+}
+
+.excerpt-text {
 
 }

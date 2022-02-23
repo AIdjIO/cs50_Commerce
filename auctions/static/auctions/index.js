@@ -35,9 +35,10 @@ function addToWatchList(id = null){
     xhttp.send(auction_id);
 }
 
-function bid(event){
+function placeBid(){
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let xhttp = new XMLHttpRequest();
+
     xhttp.onreadystatechange = function() {
         if(this.readyState == 4 && this.status == 200){
             console.log(this.responseText)
@@ -51,7 +52,9 @@ function bid(event){
                 document.querySelector('button[name="submit"]').parentNode.append(message)
             }
             message.innerText = respObj.bidMessage
-            document.querySelector('input[name="bid"]').value = parseFloat(respObj.winningBid)
+                if (this.response.winningBid){
+                    document.querySelector('input[name="bid"]').value = parseFloat(respObj.winningBid)
+                }
             }
         }
     
@@ -76,7 +79,6 @@ function comment(event){
     let commentGroup = document.getElementById('commentGroup');
     let firstComment = commentGroup.firstElementChild.firstElementChild.nextElementSibling.firstElementChild;
 
-    console.log(firstComment)
     
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     let xhttp = new XMLHttpRequest();
