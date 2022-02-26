@@ -15,6 +15,10 @@
         <script src="{% static 'auctions/index.js' %}"></script>
     </head>
     <body>
+        {% if message %}
+        <div class="message">{{ message }}</div>
+        {% endif %}
+    
         <h1>Auctions</h1>
         <div>
             {% if user.is_authenticated %}

@@ -15,7 +15,6 @@ def index(request):
    # currentAuction = Bid.objects.values('auction').annotate(maxBid = Max('bid'))
     maxAuctions = Auction.objects.annotate(max_bid=Max('bids__bid')).order_by('-creationDate')
 
-
     return render(request, "auctions/index.html",
     {"auctions": maxAuctions,'watchCount': watchCount(request)})
 
@@ -27,7 +26,7 @@ def login_view(request):
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
 
-        # Check if authentication successful
+        # Check if authentication successfull
         if user is not None:
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
@@ -38,11 +37,9 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
@@ -72,37 +69,39 @@ def register(request):
 
 @login_required(login_url='/login')
 def newListing(request):
-    if request.method == 'POST':
-        form = NewAuctionForm(request.POST)
-        if form.is_valid():
-            title = form.cleaned_data['title']
-            description = form.cleaned_data['description']
-            startBid = form.cleaned_data['startBid']
-            imageURL = form.cleaned_data['imageURL'] or ''
-            category = form.cleaned_data['category'] or 'No Category Listed'
+    form = NewAuctionForm(request.POST or None)
 
-            newListing = Auction(
-                title = title, 
-                description = description,
-                imageURL = imageURL, 
-                category = category,
-                seller = request.user
-            )
+    if request.method == 'POST' and form.is_valid():
+        title = form.cleaned_data['title']
+        description = form.cleaned_data['description']
+        startBid = float(form.cleaned_data['startBid'])
 
-            openingBid = Bid(
-                auction= newListing,
-                bid = startBid,
-                bidder = request.user
-            )
+        imageURL = form.cleaned_data['imageURL'] or ''
+        category = form.cleaned_data['category'] or 'No Category Listed'
+        
+        newListing = Auction(
+            title = title, 
+            description = description,
+            imageURL = imageURL, 
+            category = category,
+            seller = request.user,
+            ended = False
+        )
 
-            try:
-                newListing.save()
-                openingBid.save()
-            except IntegrityError:
-                return render(request, "auctions/newListings.html", {
-                    "message": "There was an issue posting your ad. Please try again"
-                })
-            return redirect(f"auction/{newListing.pk}", {"message":"Success: Your auction is now live"})
+        openingBid = Bid(
+            auction= newListing,
+            bid = startBid,
+            bidder = request.user
+        )
+
+        try:
+            newListing.save()
+            openingBid.save()
+        except IntegrityError:
+            return render(request, "auctions/newListing.html", {
+                "message": "There was an issue posting your ad. Please try again"
+            })
+        return redirect(f"auction/{newListing.pk}", {"message":"Success: Your auction is now live"})
     else:
         return render(request, "auctions/newListing.html", {'form': NewAuctionForm()})
 
@@ -113,13 +112,12 @@ def auction(request, auction_id):
     currentBids = Bid.objects.filter(auction = currentAuction) # get the bids on the current auction
     maxBid = float(currentBids.aggregate(Max('bid'))['bid__max']) # get the maximum bid amount
     currentBid = currentBids.get(bid = maxBid) # get the current bid
-    
-    print(currentBid.bidder)
+
     spanClass = 'far'
 
     # get auction comment
     comments = Comment.objects.filter(auction = auction_id).order_by('-creationDate')
-    print(request.user)
+
     if request.user == 'AnonymousUser':
         if (isInWatchList(request, auction_id).count() == 0):
             spanClass = 'far'
@@ -137,7 +135,7 @@ def auction(request, auction_id):
         'spanClass' : spanClass,
         'comments'  : comments,
         'bidForm'   : NewBidForm({'bid':round( maxBid,2 ) }),
-        'bidMessage'   : bidMessage
+        'bidMessage': bidMessage
         })
 
 @login_required(login_url='/login')
@@ -154,7 +152,7 @@ def isInWatchList(request, auction_id):
     ''' return whether an auction is in the watch list '''
     # auction_id = int(request.body.decode('utf-8'))
     currentUser = User.objects.get(username = request.user)
-    currentAuction = Auction.objects.get(id=auction_id)
+    currentAuction = Auction.objects.get(id = auction_id)
     
     # get the user watch list
     userWatchList = WatchList.objects.filter(watcher = currentUser.id, watching = auction_id)
@@ -197,10 +195,10 @@ def watchList(request):
     # get the current user
     currentUser = User.objects.filter(username = request.user).first()
     # get the user watch list
-    userWatchList = WatchList.objects.filter(watcher_id = currentUser.id)
-    print(userWatchList)
-    auctions = [c.watching for c in userWatchList]
+    userWatchList = currentUser.watcher.all()
 
+    auctions = [ (auction.watching) for auction in userWatchList ]
+    
     return render(request, "auctions/index.html", 
     {"auctions": auctions, 'watchCount': watchCount(request)
     })
@@ -210,7 +208,6 @@ def comment(request):
     ''' return watchlist '''
     # get the current user from database
     currentUser = User.objects.filter(username = request.user).first()
-    print(request.POST)
     # parse query
     queryStr = request.body.decode('utf-8')
     parsedQueryStr =  urllib.parse.parse_qs(queryStr)
@@ -235,24 +232,28 @@ def bid(request):
 
         currentUser = User.objects.get(username = request.user)
         currentAuction = Auction.objects.get(id = auction_id)
-        currentWinningBid = Bid.objects.filter(auction_id = currentAuction)      
+        currentWinningBid = Bid.objects.filter(auction_id = currentAuction)
         currentWinningBidder = currentWinningBid.get(bid = currentMaxBid).bidder
         
         print(currentMaxBid, currentUser, currentAuction, currentWinningBidder)
 
         if  request.user != currentWinningBidder: # no need for the winning bidder to bid higher than the winning bid
             if currentBid <= currentMaxBid:
-                return JsonResponse({'bidMessage':'your bid is too low','winningBid':currentMaxBid})
+                return JsonResponse({'bidMessage':'your bid is too low','winningBid': currentMaxBid })
             if currentBid > currentMaxBid:
                 newBid = Bid(
                     auction = currentAuction,
                     bid = currentBid,
                     bidder = currentUser)
                 newBid.save()
-                return JsonResponse({'bidMessage':'You are the highest bidder', 'winningBid':currentBid})
+                return JsonResponse({'bidMessage':'You are the highest bidder', 'winningBid':currentBid })
 
-    return JsonResponse({'bidMessage':'You are already the highest bidder'})
+    return JsonResponse({'bidMessage':'You are already the highest bidder', 'winningBid': currentMaxBid })
 
-# @login_required(login_url='/login')
-# def endAuction(request):
-#     return
+@login_required(login_url='/login')
+def endAuction(request, auction_id):
+    currentAuction = Auction.objects.get(pk = auction_id)
+    currentAuction.ended = True
+    currentAuction.save()
+    print(currentAuction.ended)
+    return render(request, "auctions/auction.html")

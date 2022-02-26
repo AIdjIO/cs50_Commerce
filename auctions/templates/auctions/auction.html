@@ -2,12 +2,9 @@
  
 {% block body %}
 
-    {% if message %}
-    <div class="message">{{ message }}</div>
-    {% endif %}
 
     {% if request.user == auction.seller %}
-	<form action="" method="post">
+	<form action="{% url 'end' auction.id %}" method="post">
 	{% csrf_token %}
 		<button class="btn btn-warning float-right sticky" type="submit">End Auction</button>
         </form>
@@ -46,7 +43,7 @@
                         {% endif %}
                     </form>
                 </div>
-   			 </div>
+            </div>
             <div class="col-md-4">                  
                 <div id="commentGroup">
                     {% for comment in comments %}
@@ -61,7 +58,7 @@
                     <div class="card my-2 w-100">
                         <div class="card-header">Be the first to comment</div>
                         <div class="comment card-body my-2">
-                            <p class="card-text">there are no comments at this time</p>
+                            <p class="card-text">There are no comments at this time</p>
                             <h6 class="comment card-subtitle">{% now "jS F Y H:i" %}</h6>
                         </div>
                     </div>
