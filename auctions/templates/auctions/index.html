@@ -6,13 +6,15 @@
 <div class="card-container">
     {% for auction in auctions %}
         <div class="card bg-light text-dark">
-            <img class="card-img-top" src="{{ auction.imageURL }}" alt="Card image">
-            <div class="card-body">
             <h4 class="card-title">{{ auction.title }}</h4>
+            <div class="card-body">
+                <img class="card-img-top" src="{{ auction.imageURL }}" alt="Card image">
             <p class="card-text">{{ auction.description | truncatewords:30 }}...</p>
             <a href="{% url 'auction' auction.id %}" class="w-100 btn btn-primary stretched-link">See details</a>
             </div>
         </div>
+    {% empty %}
+        <h4><em>There are no listing at this time. Check again later.</em></h4>
     {% endfor %}
 </div>
 {% endblock %}

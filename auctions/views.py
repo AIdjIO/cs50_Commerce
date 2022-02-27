@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect
@@ -130,7 +130,9 @@ def auction(request, auction_id):
         else:
             spanClass = "fas"
 
-    if (request.user == currentBid.bidder):
+    if currentBid.bidder == currentAuction.seller :
+        bidMessage = "Be the first to bid"
+    elif (request.user == currentBid.bidder):
         bidMessage = "You are the highest bidder"
     else:
         bidMessage = f"{currentBid.bidder} is the highest bidder"

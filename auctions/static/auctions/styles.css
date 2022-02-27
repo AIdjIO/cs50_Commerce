@@ -7,8 +7,16 @@
 } */
 
 body {
-    padding: 10px;
-}
+    padding:10px;
+    background-color: white;
+    color: black;
+  }
+  @media screen and (prefers-color-scheme: dark) {
+    body {
+      background-color: black;
+      color: white;
+    }
+  }
 
 img, .desc {
     border-radius: 10px!important;
@@ -29,7 +37,7 @@ img, .desc {
 .card{
     border-radius:10px;
     text-align   :center;
-    width        :250px;
+    width        :300px;
 }
 
 .card:hover{

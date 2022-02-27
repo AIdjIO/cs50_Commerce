@@ -21,8 +21,10 @@
     {% endif %}
         
     {% if ended %}
-        {% if auction.bids.first.bidder == request.user %}
+        {% if auction.bids.first.bidder == request.user and request.user != auction.seller %}
             <div class="alert alert-info">You won this auction</div>
+        {% elif auction.bids.first.bidder == auction.seller and request.user == auction.seller %}
+            <div class="alert alert-info">You ended this auction there is no winner</div>
         {% else %}
             <div class="alert alert-info">This auction has ended. {{ auction.bids.first.bidder }} has won.</div>
         {% endif %}
@@ -44,7 +46,6 @@
                             {{ bidForm.bid }}
                             <input class="form-control" type="hidden" name="auction_id" value="{{ auction.id }}">
                             <button type="button" class="form-control m-1 btn btn-success" onclick="placeBid()" name="submit">Place Bid</button>
-                            <!-- {{ auction.max_bid | floatformat:2}} -->
                             {% if bidMessage %}
                                 <div id="bidMessage" class="alert alert-info">{{ bidMessage }}</div>
                             {% endif %}
