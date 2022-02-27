@@ -3,6 +3,18 @@
 {% block body %}
     <h2>Active Listings</h2>
     {% if category %}<h3>Categories : {{ category }}</h3>{% endif %}
+<div class="card-container">
+    {% for auction in auctions %}
+        <div class="card bg-light text-dark">
+            <img class="card-img-top" src="{{ auction.imageURL }}" alt="Card image">
+            <div class="card-body">
+            <h4 class="card-title">{{ auction.title }}</h4>
+            <p class="card-text">{{ auction.description | truncatewords:30 }}...</p>
+            <a href="{% url 'auction' auction.id %}" class="w-100 btn btn-primary stretched-link">See details</a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
     <table id="auctionTable" class="display" style="width:100%">
         <thead>
             <tr>
@@ -12,9 +24,9 @@
         <tbody>
     {% for auction in auctions %}
         <tr>
-            <td><h2><a href="{% url 'auction' auction.id %}" >{{ auction.title }}</a></h2></td>
+            <td><h2><a class="stretched-link" href="{% url 'auction' auction.id %}" >{{ auction.title }}</a></h2></td>
             <td><img src="{{ auction.imageURL }}" alt="image of the auctioned item" width="auto" height="300px"></td>
-            <td  class="excerpt-text">{{ auction.description }}</td>
+            <td  class="excerpt-text">{{ auction.description | truncatewords:50 }}...</td>
             <td>{{ auction.category }}</td>
             <td> ${{ auction.max_bid | floatformat:2 }}</td>
         </tr>

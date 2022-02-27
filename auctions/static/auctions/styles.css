@@ -11,9 +11,29 @@ body {
 }
 
 img, .desc {
+    border-radius: 10px!important;
     box-shadow: 0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
-    border-radius:5px;
-    align-items:center
+    align-items: center;
+}
+
+.card-container {
+    display         :flex;
+    flex-direction  :row;
+    flex-wrap       :wrap;
+    justify-content :space-evenly;
+    align-items     :stretch;
+    align-content   :space-around;
+    gap             :10px;
+}
+
+.card{
+    border-radius:10px;
+    text-align   :center;
+    width        :250px;
+}
+
+.card:hover{
+    box-shadow :0 10px 16px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19) !important;
 }
 
 i {
@@ -42,10 +62,6 @@ h2 {
     height:400px;
 }
 
-#description{
-
-}
-
 #bid {
     box-shadow: 0 0 6px 8px #929691;
     border-radius:5px;
@@ -54,8 +70,4 @@ h2 {
     position:fixed;
     bottom:0px;
     right:0px;
-}
-
-.excerpt-text {
-
 }

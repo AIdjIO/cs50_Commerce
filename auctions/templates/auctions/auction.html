@@ -6,20 +6,29 @@
     <div class="message">{{ message }}</div>
     {% endif %}
 
-    {% if request.user == auction.seller %}
-	<form action="" method="post">
+    {% if user.is_authenticated and not ended and user == auction.seller %}
+	<form action="{% url 'end' auction.id %}" method="POST">
 	{% csrf_token %}
-		<button class="btn btn-warning float-right sticky" type="submit">End Auction</button>
-        </form>
+        <input type="hidden" name="auction_id" value={{ auction.id }}>
+		<button class="btn btn-warning float-right sticky" type="submit">End Your Auction</button>
+    </form>
     {% endif %}
 
     {% if user.is_authenticated %}
-    {% csrf_token %}
-    <input type="hidden" name="auction_id" value={{ auction.id }}>
-    <button type="button" class="btn btn-primary" id="watch" onclick="addToWatchList('{{auction.id}}')"><i class="{{ spanClass }} fa-heart"></i></button>
-    <div id="category" class="alert alert-light">Category: {{ auction.category }}</div>
+        {% csrf_token %}
+        <input type="hidden" name="auction_id" value={{ auction.id }}>
+        <button type="button" class="btn btn-primary" id="watch" onclick="addToWatchList('{{auction.id}}')"><i class="{{ spanClass }} fa-heart"></i></button>
+        <div id="category" class="alert alert-light">Category: {{ auction.category }}</div>
     {% else %}
-    <div class="alert alert-info">Log in to bid or add to watch list</div>
+        <div class="alert alert-info">Log in to bid or add to watch list</div>
+    {% endif %}
+        
+    {% if ended %}
+        {% if auction.bids.first.bidder == request.user %}
+            <div class="alert alert-info">You won this auction</div>
+        {% else %}
+            <div class="alert alert-info">This auction has ended. {{ auction.bids.first.bidder }} has won.</div>
+        {% endif %}
     {% endif %}
 
     <h3>Auction: {{ auction.title }}</h3>
@@ -31,23 +40,28 @@
             <div class="col-md-4">
                 <div id="description">{{ auction.description }}</div>
                 <div>
+                    {% if user.is_authenticated and not ended and user != auction.seller %}
                     <form id="bid" class="form-group p-1 m-1" method="POST">
                         <label>Current Bid: </label>
-                        {% if user.is_authenticated %}
-                        {% csrf_token %}
-                        {{ bidForm.bid }}
-                        <input class="form-control" type="hidden" name="auction_id" value="{{ auction.id }}">
-                        <button type="button" class="form-control m-1 btn btn-success" onclick="placeBid()" name="submit">Place Bid</button>
-                        {% else %}
-                            {{ auction.max_bid | floatformat:2}}
-                        {% endif %}
-                        {% if bidMessage %}
-                        <div id="bidMessage" class="alert alert-info">{{ bidMessage }}</div>
-                        {% endif %}
+                            {% csrf_token %}
+                            {{ bidForm.bid }}
+                            <input class="form-control" type="hidden" name="auction_id" value="{{ auction.id }}">
+                            <button type="button" class="form-control m-1 btn btn-success" onclick="placeBid()" name="submit">Place Bid</button>
+                            <!-- {{ auction.max_bid | floatformat:2}} -->
+                            {% if bidMessage %}
+                                <div id="bidMessage" class="alert alert-info">{{ bidMessage }}</div>
+                            {% endif %}
                     </form>
+                    {% endif %}
                 </div>
    			 </div>
-            <div class="col-md-4">                  
+            <div class="col-md-4">
+                <!-- Button trigger modal -->
+                {% if user.is_authenticated and not ended %}
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#postComment">
+                    Post a comment
+                </button>
+                {% endif %} 
                 <div id="commentGroup">
                     {% for comment in comments %}
                     <div class="card my-2 w-100">
@@ -67,10 +81,7 @@
                     </div>
                     {% endfor %}
                 </div>
-                <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#postComment">
-                    Post a comment
-                </button>
+
             </div>
         </div>
     </div>

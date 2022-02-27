@@ -92,10 +92,10 @@ function comment(event){
                     } else {
                     let div = document.createElement('div');
                     div.className="card my-2 w-100"
-                    div.innerHTML = `<div class="card-header">Be the first to comment</div>
+                    div.innerHTML = `<div class="card-header">${respObj.user} says:</div>
                                         <div class="comment card-body my-2">
                                         <p class="card-text">${comment}</p>
-                                        <h6 class="comment card-subtitle">${new Date().toDateString() }</h6>
+                                        <h6 class="comment card-subtitle">${new Date().toGMTString() }</h6>
                                     </div>`
                     commentGroup.insertBefore(div, commentGroup.firstElementChild)
                     }

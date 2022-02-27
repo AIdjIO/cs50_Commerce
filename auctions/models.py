@@ -12,13 +12,23 @@ class Auction(models.Model):
 	creationDate = models.DateTimeField(auto_now_add=True)
 	title 		 = models.CharField(max_length = 64, default='')
 	description  = models.TextField(default='')
-	startBid 	 = models.DecimalField(max_digits=12, decimal_places=2,validators=[MinValueValidator(0.01)], default=0.01)
+	startBid 	 = models.DecimalField(max_digits=12, decimal_places=2,validators=[MinValueValidator(0.0)], default=0.01)
 	imageURL 	 = models.URLField(default='')
 	category 	 = models.CharField(max_length = 40, default='')
 	seller 		 = models.ForeignKey(User, on_delete=models.CASCADE, related_name="seller")
+	ended 		 = models.BooleanField(default = False)
 
 	class Meta:
 		ordering = ('-creationDate',)
+
+	def hasEnded(self):
+		return self.ended
+	
+	def endAuction(self):
+		self.ended = True
+
+	def maxBid(self):
+		Bid.objects.get(id = self.id)
 
 	def __str__(self):
 		return f"{self.title} ${self.startBid} {self.category} started at {self.creationDate} sold by {self.seller}"
