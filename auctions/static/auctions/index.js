@@ -41,7 +41,7 @@ function placeBid(){
 
     xhttp.onreadystatechange = function() {
         if(this.readyState == 4 && this.status == 200){
-            console.log(this.responseText)
+
             respObj = JSON.parse(this.responseText)
             
             // sending a message to the user upon bidding.
@@ -52,9 +52,8 @@ function placeBid(){
                 document.querySelector('button[name="submit"]').parentNode.append(message)
             }
             message.innerText = respObj.bidMessage
-                if (this.response.winningBid){
-                    document.querySelector('input[name="bid"]').value = parseFloat(respObj.winningBid)
-                }
+
+            document.querySelector('input[name="bid"]').value = parseFloat(respObj.winningBid)
             }
         }
     

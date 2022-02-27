@@ -16,7 +16,6 @@ def index(request):
 
     maxAuctions = Auction.objects.annotate(max_bid=Max('bids__bid')).order_by('-creationDate')
 
-
     return render(request, "auctions/index.html",
     {"auctions": maxAuctions,'watchCount': watchCount(request)})
 
@@ -28,7 +27,7 @@ def login_view(request):
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
 
-        # Check if authentication successful
+        # Check if authentication successfull
         if user is not None:
             login(request, user)
             return HttpResponseRedirect(reverse("index"))
@@ -39,11 +38,9 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
@@ -93,8 +90,9 @@ def newListing(request):
             imageURL = imageURL, 
             category = category,
             seller = request.user,
-            startBid = startBid
-        )            
+            startBid = startBid,        
+            ended = False
+        )
 
         openingBid = Bid(
             auction= newListing,
@@ -161,7 +159,7 @@ def isInWatchList(request, auction_id):
     ''' return whether an auction is in the watch list '''
     # auction_id = int(request.body.decode('utf-8'))
     currentUser = User.objects.get(username = request.user)
-    currentAuction = Auction.objects.get(id=auction_id)
+    currentAuction = Auction.objects.get(id = auction_id)
     
     # get the user watch list
     userWatchList = WatchList.objects.filter(watcher = currentUser.id, watching = auction_id)
@@ -204,10 +202,10 @@ def watchList(request):
     # get the current user
     currentUser = User.objects.filter(username = request.user).first()
     # get the user watch list
-    userWatchList = WatchList.objects.filter(watcher_id = currentUser.id)
+    userWatchList = currentUser.watcher.all()
 
-    auctions = [c.watching for c in userWatchList]
-
+    auctions = [ (auction.watching) for auction in userWatchList ]
+    
     return render(request, "auctions/index.html", 
     {"auctions": auctions, 'watchCount': watchCount(request)
     })
@@ -245,6 +243,7 @@ def bid(request):
         currentMaxBid = float(Auction.objects.filter(pk = auction_id).annotate(max_bid=Max('bids__bid')).get(pk=auction_id).max_bid)
 
         currentUser = User.objects.get(username = request.user)
+        currentAuction = Auction.objects.get(id = auction_id)
         currentWinningBid = Bid.objects.filter(auction_id = currentAuction)
         currentWinningBidder = currentWinningBid.get(bid = currentMaxBid).bidder
         

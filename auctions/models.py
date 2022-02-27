@@ -3,6 +3,7 @@ from xml.dom.pulldom import parseString
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinValueValidator
+from decimal import Decimal
 
 class User(AbstractUser):
 	def __str__(self):
@@ -43,7 +44,7 @@ class WatchList(models.Model):
 class Bid(models.Model):
 	bidDate = models.DateTimeField(auto_now_add=True)
 	auction = models.ForeignKey(Auction, on_delete=models.CASCADE, default=0,related_name='bids')
-	bid     = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0.01)], default=0.01)
+	bid     = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))], default=0.01)
 	bidder  = models.ForeignKey(User,on_delete=models.PROTECT, related_name="currentBidder")
 
 	class Meta:
@@ -63,5 +64,3 @@ class Comment(models.Model):
 	
 	def __str__(self):
 		return f"{self.comment} on {self.creationDate}, extract:{(self.comment)}"
-
-	

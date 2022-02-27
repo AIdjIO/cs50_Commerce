@@ -30,6 +30,7 @@ Latest commit 3b6d9b0 on 10 Dec 2021
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # C extensions
 *.so
