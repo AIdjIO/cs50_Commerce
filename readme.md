@@ -1,4 +1,7 @@
 CS50W - Django Commerce site Project
+
+[![image](https://user-images.githubusercontent.com/67799618/156896641-412844c2-f44a-4cb3-aad2-19e3ed95efbc.png)](https://youtu.be/LEgO-h551_E)
+
 # Specification
 ## Complete the implementation of your auction site. You must fulfill the following requirements:
 
